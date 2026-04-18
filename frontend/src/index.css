@@ -1,0 +1,35 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  :root {
+    --background: #f8fafc; /* slate-50 */
+    --foreground: #0f172a; /* slate-900 */
+    --primary: #4f46e5; /* indigo-600 */
+    --secondary: #e2e8f0; /* slate-200 */
+    --accent: #10b981; /* emerald-500 */
+    --muted: #64748b; /* slate-500 */
+    --danger: #ef4444; /* red-500 */
+    --success: #10b981; /* emerald-500 */
+  }
+
+  .dark {
+    --background: #0f172a; /* slate-900 */
+    --foreground: #f8fafc; /* slate-50 */
+    --primary: #6366f1; /* indigo-500 */
+    --secondary: #1e293b; /* slate-800 */
+    --accent: #10b981; /* emerald-500 */
+    --muted: #94a3b8; /* slate-400 */
+    --danger: #f87171; /* red-400 */
+    --success: #34d399; /* emerald-400 */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-secondary;
+  }
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
+}
