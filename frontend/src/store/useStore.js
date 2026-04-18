@@ -20,6 +20,7 @@ export const useStore = create((set, get) => ({
   isAuthenticated: false,
   transactions: [],
   budgets: [],
+  goals: [],
   insights: [],
   isLoading: false,
   error: null,
@@ -138,6 +139,16 @@ export const useStore = create((set, get) => ({
     }
   },
 
+  updateTransaction: async (id, data) => {
+    try {
+      const res = await api.put(`/transactions/${id}`, data);
+      set((state) => ({ transactions: state.transactions.map(t => t._id === id ? res.data : t) }));
+      toast.success('Transaction updated');
+    } catch (error) {
+      toast.error('Failed to update transaction');
+    }
+  },
+
   // Budgets Actions
   fetchBudgets: async () => {
     try {
@@ -154,6 +165,46 @@ export const useStore = create((set, get) => ({
       get().fetchBudgets(); // refresh budgets
     } catch (error) {
       set({ error: 'Failed to add budget' });
+    }
+  },
+
+  // Goals Actions
+  fetchGoals: async () => {
+    try {
+      const res = await api.get('/goals');
+      set({ goals: res.data });
+    } catch (error) {
+      set({ error: 'Failed to fetch goals' });
+    }
+  },
+
+  addGoal: async (data) => {
+    try {
+      const res = await api.post('/goals', data);
+      set((state) => ({ goals: [res.data, ...state.goals] }));
+      toast.success('Goal created!');
+    } catch (error) {
+      toast.error('Failed to add goal');
+    }
+  },
+
+  updateGoal: async (id, data) => {
+    try {
+      const res = await api.patch(`/goals/${id}`, data);
+      set((state) => ({ goals: state.goals.map(g => g._id === id ? res.data : g) }));
+      toast.success('Goal updated!');
+    } catch (error) {
+      toast.error('Failed to update goal');
+    }
+  },
+
+  deleteGoal: async (id) => {
+    try {
+      await api.delete(`/goals/${id}`);
+      set((state) => ({ goals: state.goals.filter(g => g._id !== id) }));
+      toast.success('Goal deleted');
+    } catch (error) {
+      toast.error('Failed to delete goal');
     }
   },
 

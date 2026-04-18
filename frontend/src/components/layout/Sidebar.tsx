@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Receipt, LineChart, Target, BrainCircuit, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, Receipt, LineChart, Target, BrainCircuit, User, LogOut, PiggyBank } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { name: 'Transactions', path: '/app/transactions', icon: Receipt },
   { name: 'Analytics', path: '/app/analytics', icon: LineChart },
   { name: 'Budget', path: '/app/budget', icon: Target },
+  { name: 'Goals', path: '/app/goals', icon: PiggyBank },
   { name: 'AI Insights', path: '/app/insights', icon: BrainCircuit },
   { name: 'Profile', path: '/app/profile', icon: User },
 ];

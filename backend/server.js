@@ -8,6 +8,7 @@ import authRoutes from "./routes/authRoutes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
 import aiInsightsRoutes from "./routes/aiInsightsRoutes.js";
+import goalRoutes from "./routes/goalRoutes.js";
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/pocket-hone
 app.use("/api/auth", authRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/budgets", budgetRoutes);
-app.use("/api/insights", aiInsightsRoutes); // For AI features
+app.use("/api/insights", aiInsightsRoutes);
+app.use("/api/goals", goalRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
