@@ -165,5 +165,46 @@ export const useStore = create((set, get) => ({
     } catch (error) {
       set({ error: 'Failed to fetch insights' });
     }
-  }
+  },
+
+  // Budget Alerts
+  getBudgetAlerts: () => {
+    const { budgets, transactions } = get();
+
+    const getPeriodStart = (period) => {
+      const now = new Date();
+      switch (period) {
+        case 'daily':
+          return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        case 'weekly': {
+          const diff = now.getDate() - now.getDay();
+          return new Date(now.getFullYear(), now.getMonth(), diff);
+        }
+        case 'annually':
+          return new Date(now.getFullYear(), 0, 1);
+        case 'monthly':
+        default:
+          return new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+    };
+
+    return budgets.map((budget) => {
+      const period = budget.period || 'monthly';
+      const periodStart = getPeriodStart(period);
+      const spent = transactions
+        .filter((t) =>
+          t.type === 'expense' &&
+          t.category === budget.category &&
+          new Date(t.date) >= periodStart
+        )
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const percentage = (spent / budget.limit) * 100;
+      let level = null;
+      if (percentage >= 100) level = 'danger';
+      else if (percentage >= 80) level = 'warning';
+
+      return level ? { budget, spent, percentage, level, period } : null;
+    }).filter(Boolean);
+  },
 }));
