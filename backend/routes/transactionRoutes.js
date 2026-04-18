@@ -17,10 +17,32 @@ router.get('/', protect, async (req, res) => {
 // Create transaction
 router.post('/', protect, async (req, res) => {
   const { type, amount, category, date, description } = req.body;
+  
+  let finalCategory = category;
+  
+  // Basic Auto-categorization logic
+  if (type === 'expense' && (!category || category === 'Other')) {
+    const desc = (description || '').toLowerCase();
+    const map = {
+      'Food & Dining': ['pizza', 'burger', 'restaurant', 'cafe', 'starbucks', 'kfc', 'mcdonald', 'uber eats', 'doordash', 'grocery', 'supermarket', 'food'],
+      'Transportation': ['uber', 'lyft', 'bolt', 'taxi', 'fuel', 'gas', 'bus', 'train', 'flight', 'airline'],
+      'Housing': ['rent', 'mortgage', 'home'],
+      'Utilities': ['electricity', 'water', 'internet', 'wifi', 'phone', 'bill', 'netflix', 'spotify', 'subscription'],
+      'Entertainment': ['cinema', 'movie', 'game', 'playstation', 'xbox', 'concert', 'club'],
+    };
+
+    for (const [cat, keywords] of Object.entries(map)) {
+      if (keywords.some(k => desc.includes(k))) {
+        finalCategory = cat;
+        break;
+      }
+    }
+  }
+
   try {
     const transaction = await Transaction.create({
       userId: req.user._id,
-      type, amount, category, date: date || Date.now(), description
+      type, amount, category: finalCategory || 'Other', date: date || Date.now(), description
     });
     res.status(201).json(transaction);
   } catch (error) {

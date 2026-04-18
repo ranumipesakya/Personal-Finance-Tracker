@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, DollarSign, Wallet, Target, PiggyBank } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
+import { CardSkeleton, Skeleton } from '../components/Skeleton';
 
 function HealthScore({ score }: { score: number }) {
   const color = score >= 75 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444';
@@ -42,12 +43,10 @@ function computeHealthScore(transactions: any[], budgets: any[]) {
   const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
   let score = 50;
-  // Savings rate (0-30 pts)
   if (income > 0) {
     const savingsRate = (income - expense) / income;
     score += Math.min(savingsRate * 30, 30);
   }
-  // Budget adherence (0-20 pts)
   if (budgets.length > 0) {
     const month = new Date().toISOString().slice(0, 7);
     const monthExpenses = transactions.filter(t => t.type === 'expense' && t.date?.slice(0, 7) === month);
@@ -59,19 +58,38 @@ function computeHealthScore(transactions: any[], budgets: any[]) {
       score += (onTrack / monthBudgets.length) * 20;
     }
   }
-  // Positive balance bonus (0 or +10 pts)
   if (income > expense) score = Math.min(score + 10, 100);
   return Math.max(0, Math.min(Math.round(score), 100));
 }
 
 export default function Dashboard() {
-  const { transactions, fetchTransactions, fetchBudgets, fetchGoals, budgets, goals, user, formatCurrency } = useStore();
+  const { transactions, fetchTransactions, fetchBudgets, fetchGoals, budgets, goals, user, formatCurrency, isLoading } = useStore();
 
   useEffect(() => {
     fetchTransactions();
     fetchBudgets();
     fetchGoals();
   }, [fetchTransactions, fetchBudgets, fetchGoals]);
+
+  if (isLoading && transactions.length === 0) {
+     return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <CardSkeleton /> <CardSkeleton /> <CardSkeleton />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Skeleton className="lg:col-span-2 h-[320px]" />
+            <Skeleton className="h-[320px]" />
+          </div>
+        </div>
+     );
+  }
 
   const totalIncome = transactions.filter((t: any) => t.type === 'income').reduce((acc: number, curr: any) => acc + curr.amount, 0);
   const totalExpense = transactions.filter((t: any) => t.type === 'expense').reduce((acc: number, curr: any) => acc + curr.amount, 0);
@@ -85,9 +103,9 @@ export default function Dashboard() {
   }));
 
   const statCards = [
-    { title: 'Total Balance', amount: balance, icon: Wallet, color: 'text-primary', bg: 'bg-primary/10', prefix: balance < 0 ? '-' : '' },
-    { title: 'Total Income', amount: totalIncome, icon: TrendingUp, color: 'text-success', bg: 'bg-success/10', prefix: '+' },
-    { title: 'Total Expense', amount: totalExpense, icon: TrendingDown, color: 'text-danger', bg: 'bg-danger/10', prefix: '-' },
+    { title: 'Total Balance', amount: balance, icon: Wallet, color: 'text-primary', bg: 'bg-primary/10' },
+    { title: 'Total Income', amount: totalIncome, icon: TrendingUp, color: 'text-success', bg: 'bg-success/10' },
+    { title: 'Total Expense', amount: totalExpense, icon: TrendingDown, color: 'text-danger', bg: 'bg-danger/10' },
   ];
 
   return (
@@ -99,7 +117,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {statCards.map((stat, i) => (
           <motion.div
@@ -122,9 +139,7 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Charts + Health + Recent */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Cash Flow Chart */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -150,7 +165,6 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Health Score */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -168,7 +182,6 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      {/* Recent Transactions + Goals preview */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -201,7 +214,6 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Goals preview */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
